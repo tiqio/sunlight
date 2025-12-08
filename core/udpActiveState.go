@@ -1,14 +1,14 @@
 package core
 
 import (
-	"sunlight/cipher"
+	"net"
 )
 
 type UdpActiveState struct {
 	s *Session
 }
 
-func (u UdpActiveState) handleFrame(frame cipher.Frame) error {
+func (u UdpActiveState) handle(conn net.Conn) error {
 	//TODO implement me
 	panic("implement me")
 }

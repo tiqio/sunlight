@@ -1,7 +1,22 @@
 package core
 
-import "sunlight/cipher"
+import "net"
 
 type State interface {
-	handleFrame(frame cipher.Frame) error
+	handle(conn net.Conn) error
 }
+
+type StateEnum uint8
+
+const (
+	INIT StateEnum = iota
+	COMMAND
+	TCP_CONNECT
+	TCP_ACTIVE
+	UDP_CONNECT
+	UDP_ACTIVE
+	TCP_TRANSFER
+	UDP_RELAY
+	UDP_TRANSFER
+	TERMINATE
+)

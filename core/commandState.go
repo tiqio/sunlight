@@ -1,16 +1,32 @@
 package core
 
 import (
-	"sunlight/cipher"
+	"log"
+	"net"
+	"sunlight/socks"
 )
 
 type CommandState struct {
 	s *Session
 }
 
-func (c CommandState) handleFrame(frame cipher.Frame) error {
-	//TODO implement me
-	panic("implement me")
+func (c CommandState) handle(conn net.Conn) error {
+	// read command
+	request, err := socks.ReadRequest(conn)
+	if err != nil {
+		log.Printf(`[socks5] read command failed: %s`, err)
+		return err
+	}
+	c.s.request = request
+	switch request.Cmd {
+	case socks.CmdConnect:
+		c.s.setState(TCP_CONNECT)
+	case socks.CmdUDP:
+		c.s.setState(UDP_CONNECT)
+	default:
+		log.Fatalf("[socks5] unknown command: %d", request.Cmd)
+	}
+	return nil
 }
 
 func NewCommandState(s *Session) *CommandState {

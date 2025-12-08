@@ -1,12 +1,14 @@
 package core
 
-import "sunlight/cipher"
+import (
+	"net"
+)
 
 type UdpRelayState struct {
 	s *Session
 }
 
-func (u UdpRelayState) handleFrame(frame cipher.Frame) error {
+func (u UdpRelayState) handle(conn net.Conn) error {
 	//TODO implement me
 	panic("implement me")
 }

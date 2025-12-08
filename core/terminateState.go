@@ -1,12 +1,14 @@
 package core
 
-import "sunlight/cipher"
+import (
+	"net"
+)
 
 type TerminateState struct {
 	s *Session
 }
 
-func (t TerminateState) handleFrame(frame cipher.Frame) error {
+func (t TerminateState) handle(conn net.Conn) error {
 	//TODO implement me
 	panic("implement me")
 }
