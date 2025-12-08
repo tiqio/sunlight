@@ -33,6 +33,7 @@ const (
 	CmdConnect uint8 = iota + 1
 	CmdBind
 	CmdUDP
+	CmdProxy
 	CmdUDPOverTCP
 )
 

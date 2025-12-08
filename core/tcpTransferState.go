@@ -11,21 +11,22 @@ type TcpTransferState struct {
 	s *Session
 }
 
-func (t TcpTransferState) handle(conn net.Conn) error {
+func (t TcpTransferState) handle(conn net.Conn) {
 	var dash rune
 	req := t.s.request
 	nextHop := t.s.nextHop
 
 	if t.s.isProxy {
+		req.Cmd = socks.CmdProxy
 		if err := req.Write(nextHop); err != nil {
 			log.Printf(`[socks5] "connect" send request failed: %s`, err)
-			return err
+			t.s.setState(TERMINATE)
 		}
 		dash = '-'
 	} else {
 		if err := socks.NewReply(socks.Succeeded, nil).Write(conn); err != nil {
 			log.Printf(`[socks5] "connect" write reply failed: %s`, err)
-			return err
+			t.s.setState(TERMINATE)
 		}
 		dash = '='
 	}
@@ -35,7 +36,6 @@ func (t TcpTransferState) handle(conn net.Conn) error {
 		log.Printf(`[socks5] "connect" transport failed: %s`, err)
 	}
 	log.Printf(`[socks5] "connect" tunnel disconnected %s >%c< %s`, conn.RemoteAddr(), dash, req.Addr)
-	return nil
 }
 
 func NewTcpTransferState(s *Session) *TcpTransferState {

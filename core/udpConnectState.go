@@ -10,7 +10,7 @@ type UdpConnectionState struct {
 	s *Session
 }
 
-func (u UdpConnectionState) handle(conn net.Conn) error {
+func (u UdpConnectionState) handle(conn net.Conn) {
 	log.Printf(`[socks5] "udp" associate UDP for %s`, conn.RemoteAddr())
 	udp, err := net.ListenUDP("udp", nil)
 	if err != nil {
@@ -18,7 +18,7 @@ func (u UdpConnectionState) handle(conn net.Conn) error {
 		if err := socks.NewReply(socks.Failure, nil).Write(conn); err != nil {
 			log.Printf(`[socks5] "udp" write reply failed %s`, err)
 		}
-		return err
+		u.s.setState(TERMINATE)
 	}
 
 	nextHop, err := u.s.requestServer4UDP()
@@ -28,19 +28,12 @@ func (u UdpConnectionState) handle(conn net.Conn) error {
 			log.Printf(`[socks5] "udp" Write reply failed %s`, err)
 		}
 
-		return err
-	}
-
-	addr, _ := socks.NewAddrFromAddr(udp.LocalAddr(), conn.LocalAddr())
-	if err := socks.NewReply(socks.Succeeded, addr).Write(conn); err != nil {
-		log.Printf(`[socks5] "udp" write reply failed %s`, err)
-		return err
+		u.s.setState(TERMINATE)
 	}
 
 	u.s.udp = udp
 	u.s.nextHop = nextHop
 	u.s.setState(UDP_RELAY)
-	return nil
 }
 
 func NewUdpConnectionState(s *Session) *UdpConnectionState {

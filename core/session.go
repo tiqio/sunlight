@@ -15,7 +15,7 @@ type Session struct {
 	request *socks.Request
 	isProxy bool
 	nextHop net.Conn
-	udp     net.Conn
+	udp     *net.UDPConn
 
 	accessAddr net.TCPAddr
 }
@@ -45,6 +45,7 @@ func NewSession(id int) *Session {
 	tcpTransferState := NewTcpTransferState(s)
 	udpRelayState := NewUdpRelayState(s)
 	udpTransferState := NewUdpTransferState(s)
+	terminateState := NewTerminateState(s)
 
 	s.registerState(INIT, initState)
 	s.registerState(COMMAND, commandState)
@@ -55,6 +56,7 @@ func NewSession(id int) *Session {
 	s.registerState(TCP_TRANSFER, tcpTransferState)
 	s.registerState(UDP_RELAY, udpRelayState)
 	s.registerState(UDP_TRANSFER, udpTransferState)
+	s.registerState(TERMINATE, terminateState)
 
 	return s
 }

@@ -10,7 +10,7 @@ type TcpConnectionState struct {
 	s *Session
 }
 
-func (t TcpConnectionState) handle(conn net.Conn) error {
+func (t TcpConnectionState) handle(conn net.Conn) {
 	var nextHop net.Conn
 	var err error
 
@@ -26,7 +26,7 @@ func (t TcpConnectionState) handle(conn net.Conn) error {
 			if err = socks.NewReply(socks.HostUnreachable, nil).Write(conn); err != nil {
 				log.Printf(`[socks5] "connect" write reply failed: %s`, err)
 			}
-			return err
+			t.s.setState(TERMINATE)
 		}
 
 	} else {
@@ -43,7 +43,7 @@ func (t TcpConnectionState) handle(conn net.Conn) error {
 					if err = socks.NewReply(socks.HostUnreachable, nil).Write(conn); err != nil {
 						log.Printf(`[socks5] "connect" write reply failed: %s`, err)
 					}
-					return err
+					t.s.setState(TERMINATE)
 				}
 				// set proxy in rules
 			} else {
@@ -52,14 +52,13 @@ func (t TcpConnectionState) handle(conn net.Conn) error {
 				if err = socks.NewReply(socks.HostUnreachable, nil).Write(conn); err != nil {
 					log.Printf(`[socks5] "connect" write reply failed: %s`, err)
 				}
-				return err
+				t.s.setState(TERMINATE)
 			}
 		}
 	}
 
 	t.s.nextHop = nextHop
 	t.s.setState(TCP_TRANSFER)
-	return nil
 }
 
 func NewTcpConnectionState(s *Session) *TcpConnectionState {

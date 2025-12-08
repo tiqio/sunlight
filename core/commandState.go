@@ -10,12 +10,12 @@ type CommandState struct {
 	s *Session
 }
 
-func (c CommandState) handle(conn net.Conn) error {
+func (c CommandState) handle(conn net.Conn) {
 	// read command
 	request, err := socks.ReadRequest(conn)
 	if err != nil {
 		log.Printf(`[socks5] read command failed: %s`, err)
-		return err
+		c.s.setState(TERMINATE)
 	}
 	c.s.request = request
 	switch request.Cmd {
@@ -26,7 +26,7 @@ func (c CommandState) handle(conn net.Conn) error {
 	default:
 		log.Fatalf("[socks5] unknown command: %d", request.Cmd)
 	}
-	return nil
+	return
 }
 
 func NewCommandState(s *Session) *CommandState {

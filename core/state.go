@@ -3,7 +3,7 @@ package core
 import "net"
 
 type State interface {
-	handle(conn net.Conn) error
+	handle(conn net.Conn)
 }
 
 type StateEnum uint8

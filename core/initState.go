@@ -10,12 +10,12 @@ type InitState struct {
 	s *Session
 }
 
-func (i InitState) handle(conn net.Conn) error {
+func (i InitState) handle(conn net.Conn) {
 	// select method
 	methods, err := socks.ReadMethods(conn)
 	if err != nil {
 		log.Printf(`[socks5] read methods failed: %s`, err)
-		return err
+		i.s.setState(TERMINATE)
 	}
 	method := socks.MethodNoAcceptable
 	for _, m := range methods {
@@ -30,11 +30,10 @@ func (i InitState) handle(conn net.Conn) error {
 		} else {
 			log.Printf(`[socks5] methods is not acceptable`)
 		}
-		return err
+		i.s.setState(TERMINATE)
 	}
 
 	i.s.setState(COMMAND)
-	return nil
 }
 
 func NewInitState(s *Session) *InitState {
