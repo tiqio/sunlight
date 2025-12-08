@@ -24,8 +24,15 @@ func (u UdpRelayState) handle(conn net.Conn) {
 	}
 
 	log.Printf(`[socks5] "udp" tunnel established (UDP)%s <-> %s`, udp.LocalAddr(), u.s.accessAddr.String())
-	go relayTunnelUDP(udp, nextHop)
+	go func() {
+		// udp <-> nextHop
+		err := relayTunnelUDP(udp, nextHop)
+		if err != nil {
+			u.s.setState(TERMINATE)
+		}
+	}()
 	if err := waiting4EOF(conn); err != nil {
+		u.s.setState(TERMINATE)
 		log.Printf(`[socks5] "udp" waiting for EOF failed: %s`, err)
 	}
 	log.Printf(`[socks5] "udp" tunnel disconnected (UDP)%s >-< %s`, udp.LocalAddr(), u.s.accessAddr.String())

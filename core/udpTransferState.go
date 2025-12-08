@@ -20,9 +20,13 @@ func (u UdpTransferState) handle(conn net.Conn) {
 	}
 
 	log.Printf(`[socks5] "udp-over-tcp" tunnel established %s <-> (UDP)%s`, conn.RemoteAddr(), udp.LocalAddr())
-	if err := transferTunnelUDP(conn, udp); err != nil {
-		log.Printf(`[socks5] "udp-over-tcp" tunnel UDP failed: %s`, err)
-	}
+	go func() {
+		// conn <-> udp
+		err := transferTunnelUDP(conn, udp)
+		if err != nil {
+			u.s.setState(TERMINATE)
+		}
+	}()
 	log.Printf(`[socks5] "udp-over-tcp" tunnel disconnected %s >-< (UDP)%s`, conn.RemoteAddr(), udp.LocalAddr())
 }
 

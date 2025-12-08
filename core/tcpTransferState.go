@@ -33,6 +33,7 @@ func (t TcpTransferState) handle(conn net.Conn) {
 
 	log.Printf(`[socks5] "connect" tunnel established %s <%c> %s`, conn.RemoteAddr(), dash, req.Addr)
 	if err := utils.Transport(conn, nextHop); err != nil {
+		t.s.setState(TERMINATE)
 		log.Printf(`[socks5] "connect" transport failed: %s`, err)
 	}
 	log.Printf(`[socks5] "connect" tunnel disconnected %s >%c< %s`, conn.RemoteAddr(), dash, req.Addr)
